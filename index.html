@@ -8,64 +8,123 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 50px;
-            background-color: #ffccff;
+            margin: 0;
+            background-color: #cc0052;
             overflow: hidden;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
         }
         .banner {
-            background: #ff66b2;
+            background: #99004d;
             color: white;
             padding: 20px;
             font-size: 24px;
             font-weight: bold;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 10;
         }
         .container {
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-            margin-top: 20px;
-        }
-        @keyframes confetti {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-        .confetti {
             position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #ff0000;
-            opacity: 0.8;
-            border-radius: 50%;
-            animation: confetti 3s linear infinite;
+            left: 50%;
+            top: 100px;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+        .bouncing-image {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: grab;
         }
     </style>
 </head>
 <body>
+    <audio id="applause" src="https://www.fesliyanstudios.com/play-mp3/4385" autoplay></audio>
     <div class="banner">Kubernetes Trial</div>
     <div class="container">
         <h1>Welcome to My Web App</h1>
         <p>This is a simple static page ready to be deployed in Kubernetes.</p>
-        <button onclick="alert('Hello from Kubernetes!')">Click Me</button>
+        <button onclick="alert('HELLO!')">Click Me</button>
     </div>
     <script>
-        function createConfetti() {
-            for (let i = 0; i < 100; i++) {
-                let confetti = document.createElement("div");
-                confetti.classList.add("confetti");
-                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                confetti.style.left = Math.random() * 100 + "vw";
-                confetti.style.top = Math.random() * -10 + "vh";
-                confetti.style.animationDuration = (Math.random() * 3 + 2) + "s";
-                document.body.appendChild(confetti);
+        const imageSources = [
+            "https://i.pinimg.com/736x/4f/c5/d9/4fc5d95515098df3f16ae1ef5115525e.jpg",
+            "https://i.pinimg.com/736x/28/67/1c/28671c54ebe8c063244d386d625b34a6.jpg",
+            "https://i.pinimg.com/736x/7e/7e/c6/7e7ec6414d077885d579fe71b253c2a2.jpg",
+            "https://i.pinimg.com/736x/a2/de/e7/a2dee7720e3bc7d797f25bc063c83336.jpg",
+            "https://i.pinimg.com/736x/ee/67/2c/ee672cf08a89f530c92751b543498c42.jpg",
+            "https://i.pinimg.com/736x/81/d6/54/81d6540f4cc87b34c186ae465fe83ae5.jpg"
+        ];
+        
+        function createBouncingImage(src) {
+            let img = document.createElement("img");
+            img.src = src;
+            img.classList.add("bouncing-image");
+            document.body.appendChild(img);
+            
+            let x = Math.random() * (window.innerWidth - 100);
+            let y = Math.random() * (window.innerHeight - 100);
+            let dx = (Math.random() - 0.5) * 6;
+            let dy = (Math.random() - 0.5) * 6;
+            let isDragging = false;
+            let offsetX, offsetY;
 
-                setTimeout(() => {
-                    confetti.remove();
-                }, 5000);
+            function move() {
+                if (!isDragging) {
+                    x += dx;
+                    y += dy;
+
+                    if (x <= 0 || x >= window.innerWidth - 100) {
+                        dx *= -1;
+                        x = Math.max(0, Math.min(x, window.innerWidth - 100));
+                    }
+                    if (y <= 0 || y >= window.innerHeight - 100) {
+                        dy *= -1;
+                        y = Math.max(0, Math.min(y, window.innerHeight - 100));
+                    }
+                }
+
+                img.style.transform = `translate(${x}px, ${y}px)`;
+                requestAnimationFrame(move);
             }
+            move();
+
+            img.addEventListener("mousedown", (e) => {
+                isDragging = true;
+                offsetX = e.clientX - x;
+                offsetY = e.clientY - y;
+                img.style.cursor = "grabbing";
+            });
+
+            document.addEventListener("mousemove", (e) => {
+                if (isDragging) {
+                    x = e.clientX - offsetX;
+                    y = e.clientY - offsetY;
+
+                    x = Math.max(0, Math.min(x, window.innerWidth - 100));
+                    y = Math.max(0, Math.min(y, window.innerHeight - 100));
+
+                    img.style.transform = `translate(${x}px, ${y}px)`;
+                }
+            });
+
+            document.addEventListener("mouseup", () => {
+                isDragging = false;
+                img.style.cursor = "grab";
+            });
         }
-        window.onload = createConfetti;
+
+        imageSources.forEach(src => createBouncingImage(src));
     </script>
 </body>
 </html>
